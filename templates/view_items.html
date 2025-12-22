@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utang Items - {{ credit.customer_name }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .back-button {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .credit-info {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .info-item label {
+            font-size: 0.85em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .info-item .value {
+            font-size: 1.2em;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .items-section {
+            padding: 30px;
+        }
+        
+        .items-section h2 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .items-list {
+            list-style: none;
+        }
+        
+        .item-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            gap: 15px;
+        }
+        
+        .item-card:hover {
+            border-color: #1e3c72;
+            box-shadow: 0 5px 15px rgba(30, 60, 114, 0.1);
+        }
+        
+        .item-info {
+            flex: 1;
+        }
+        
+        .item-name {
+            font-size: 1.2em;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .item-date {
+            font-size: 0.85em;
+            color: #999;
+        }
+        
+        .item-cost {
+            font-size: 1.5em;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .btn-paid {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-paid:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+        
+        .total-section {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        .grand-total h3 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        
+        .total-amount {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+        
+        .no-items {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .no-items-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .action-buttons-header {
+            padding: 20px 30px;
+            background: white;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-add-product {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+        
+        .btn-add-product:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-mark-all-paid {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+        }
+        
+        .btn-mark-all-paid:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+        
+        .btn-delete {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .modal-header h3 {
+            font-size: 1.5em;
+            color: #1e3c72;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 2em;
+            cursor: pointer;
+            color: #999;
+            line-height: 1;
+        }
+        
+        .modal-close:hover {
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #1e3c72;
+        }
+        
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .form-buttons button {
+            flex: 1;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .credit-info, .items-section {
+                padding: 20px;
+            }
+            
+            .item-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .total-amount {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Utang Items</h1>
+            <p>{{ credit.customer_name }}</p>
+            <a href="/" class="back-button">← Back to Dashboard</a>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="action-buttons-header">
+            <button onclick="showAddProductModal()" class="btn btn-add-product">
+                ➕ Add Product
+            </button>
+            {% if credit.status == 'pending' %}
+            <form action="/mark_paid/{{ credit.id }}" method="POST" style="display: inline;">
+                <button type="submit" class="btn btn-mark-all-paid">
+                    ✓ Mark All Paid
+                </button>
+            </form>
+            {% endif %}
+            <form action="/delete_credit/{{ credit.id }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this entire credit record? This action cannot be undone.');">
+                <button type="submit" class="btn btn-delete">
+                    🗑 Delete Credit
+                </button>
+            </form>
+        </div>
+        
+        <div class="credit-info">
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Utang ID</label>
+                    <div class="value">#{{ credit.id }}</div>
+                </div>
+                <div class="info-item">
+                    <label>Customer Name</label>
+                    <div class="value">{{ credit.customer_name }}</div>
+                </div>
+                <div class="info-item">
+                    <label>Payment Date</label>
+                    <div class="value">{{ credit.estimated_payment_date }}</div>
+                </div>
+                <div class="info-item">
+                    <label>Status</label>
+                    <div class="value">
+                        {% if credit.status == 'pending' %}
+                        <span class="status-badge status-pending">Pending</span>
+                        {% else %}
+                        <span class="status-badge status-paid">Paid</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="items-section">
+            <h2>🛒 Products</h2>
+            {% if items %}
+            <ul class="items-list">
+                {% for item in items %}
+                <li class="item-card">
+                    <div class="item-info">
+                        <div class="item-name">{{ item.product }}</div>
+                        <div class="item-date">Added: {{ item.added_at }}</div>
+                    </div>
+                    <div class="item-cost">₱{{ "%.2f"|format(item.cost) }}</div>
+                    <form action="/mark_item_paid/{{ credit.id }}/{{ item.id }}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn-paid">✓ Mark Paid</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="no-items">
+                <div class="no-items-icon">📦</div>
+                <h3>No items found</h3>
+                <p>This credit has no products added yet.</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="total-section">
+            <div class="grand-total">
+                <h3>Total Remaining Amount</h3>
+                <div class="total-amount">₱{{ "%.2f"|format(total.total or 0) }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Product Modal -->
+    <div class="modal" id="addProductModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>➕ Add Product</h3>
+                <button class="modal-close" onclick="closeAddProductModal()">×</button>
+            </div>
+            <form action="/add_product/{{ credit.id }}" method="POST">
+                <div class="form-group">
+                    <label>Customer</label>
+                    <input type="text" value="{{ credit.customer_name }}" readonly style="background: #f0f0f0;">
+                </div>
+                <div class="form-group">
+                    <label for="product">Product</label>
+                    <input type="text" id="product" name="product" placeholder="Enter product name" required>
+                </div>
+                <div class="form-group">
+                    <label for="cost">Cost (₱)</label>
+                    <input type="number" id="cost" name="cost" step="0.01" min="0" placeholder="0.00" required>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-add-product">Add Product</button>
+                    <button type="button" class="btn btn-delete" onclick="closeAddProductModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        function showAddProductModal() {
+            document.getElementById('addProductModal').classList.add('active');
+            document.getElementById('product').value = '';
+            document.getElementById('cost').value = '';
+        }
+        
+        function closeAddProductModal() {
+            document.getElementById('addProductModal').classList.remove('active');
+        }
+        
+        // Close modal when clicking outside
+        document.getElementById('addProductModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAddProductModal();
+            }
+        });
+    </script>
+</body>
+</html>
+
