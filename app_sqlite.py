@@ -1,14 +1,29 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, Response
+from flask import Flask, render_template, request, jsonify, redirect, url_for, Response, session
 import sqlite3
 from datetime import datetime
 import os
+from functools import wraps
 
 
 app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY', 'utang-secret-key-change-in-production-2025')
+
+# Login credentials
+LOGIN_EMAIL = 'jcpogi@1234'
+LOGIN_PASSWORD = '12345'
 
 # Database file path - use /opt/render/project/src for Render deployment
 DB_PATH = os.getenv('DB_PATH', '.')
 DB_FILE = os.path.join(DB_PATH, 'store_credit.db')
+
+# Login required decorator
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'logged_in' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 def init_db():
     """Initialize the database with the required table"""
@@ -79,7 +94,34 @@ def get_db_connection():
     connection.row_factory = sqlite3.Row
     return connection
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Login page"""
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        if email == LOGIN_EMAIL and password == LOGIN_PASSWORD:
+            session['logged_in'] = True
+            session['user'] = email
+            return redirect(url_for('index'))
+        else:
+            return render_template('login.html', error='Invalid email or password')
+    
+    # If already logged in, redirect to index
+    if 'logged_in' in session:
+        return redirect(url_for('index'))
+    
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    """Logout user"""
+    session.clear()
+    return redirect(url_for('login'))
+
 @app.route('/')
+@login_required
 def index():
     """Main page - display all credits"""
     try:
@@ -130,6 +172,7 @@ def index():
         return f"Database error: {e}", 500
 
 @app.route('/add_credit', methods=['POST'])
+@login_required
 def add_credit():
     """Add a new credit entry"""
     customer_name = request.form.get('customer_name')
@@ -169,6 +212,7 @@ def add_credit():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/mark_paid/<int:credit_id>', methods=['POST'])
+@login_required
 def mark_paid(credit_id):
     """Mark a credit as paid"""
     try:
@@ -190,6 +234,7 @@ def mark_paid(credit_id):
         return jsonify({'error': str(e)}), 500
 
 @app.route('/add_product/<int:credit_id>', methods=['POST'])
+@login_required
 def add_product(credit_id):
     """Add a new product to an existing credit"""
     product = request.form.get('product')
@@ -226,6 +271,7 @@ def add_product(credit_id):
         return jsonify({'error': str(e)}), 500
 
 @app.route('/view_items/<int:credit_id>')
+@login_required
 def view_items(credit_id):
     """View all items for a specific credit"""
     try:
@@ -271,6 +317,7 @@ def view_items(credit_id):
         return f"Database error: {e}", 500
 
 @app.route('/mark_item_paid/<int:credit_id>/<int:item_id>', methods=['POST'])
+@login_required
 def mark_item_paid(credit_id, item_id):
     """Mark a specific item as paid and remove it"""
     try:
@@ -308,6 +355,7 @@ def mark_item_paid(credit_id, item_id):
         return jsonify({'error': str(e)}), 500
 
 @app.route('/delete_credit/<int:credit_id>', methods=['POST'])
+@login_required
 def delete_credit(credit_id):
     """Delete a credit entry and reorder IDs"""
     try:
@@ -401,6 +449,7 @@ def delete_credit(credit_id):
         return jsonify({'error': str(e)}), 500
 
 @app.route('/search')
+@login_required
 def search():
     """Search credits by customer name"""
     query = request.args.get('q', '')
@@ -459,6 +508,7 @@ def search():
         return f"Database error: {e}", 500
 
 @app.route('/export_credits')
+@login_required
 def export_credits():
     """Export credits list to a text file"""
     try:

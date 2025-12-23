@@ -1455,6 +1455,10 @@
                     <span class="nav-icon">🧮</span>
                     <span>Kalkulador</span>
                 </div>
+                <div class="nav-item" onclick="logout()" style="margin-top: 20px; background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                    <span class="nav-icon">🚪</span>
+                    <span>Logout</span>
+                </div>
             </nav>
             
             <div class="sidebar-footer">
@@ -2026,6 +2030,13 @@
             const overlay = document.getElementById('overlay');
             sidebar.classList.toggle('active');
             overlay.classList.toggle('active');
+        }
+        
+        // Logout function
+        function logout() {
+            if (confirm('Sigurado ka na boot mong mag-logout?')) {
+                window.location.href = '/logout';
+            }
         }
         
         // Show specific section
