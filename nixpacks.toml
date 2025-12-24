@@ -5,4 +5,4 @@ nixPkgs = ["python310"]
 cmds = ["pip install -r requirements.txt"]
 
 [start]
-cmd = "gunicorn app_sqlite:app --bind 0.0.0.0:$PORT"
+cmd = "gunicorn app_sqlite:app --bind 0.0.0.0:${PORT:-5000}"
